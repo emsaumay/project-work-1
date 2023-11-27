@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo - Sentimental Analysis for Stocks</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .custom-btn {
+            background-color: #4F46E5;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+        .custom-btn:hover {
+            background-color: #3730A3;
+        }
+        .custom-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-bottom: 2rem;
+        }
+        .custom-table th,
+        .custom-table td {
+            border: 1px solid #ffffff50;
+            padding: 0.5rem;
+            text-align: left;
+        }
+        .custom-table th {
+            background-color: #4F46E5;
+        }
+        .custom-table th.th-plus {
+        background-color: #00ff0094; 
+        }
+        .custom-table th.th-minus {
+            background-color: #ff0000a3;
+        }
+        .custom-table tbody tr:nth-child(odd) {
+            background-color: #374151;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+          theme: {
+            extend: {
+              fontFamily: {
+                sans: ['Inter', 'sans-serif'],
+              },
+            },
+          },
+        }
+    </script>
+</head>
+<body class="bg-gray-900 text-white">
+    <div class="container mx-auto px-3 py-8">
+        <nav class="flex justify-center space-x-4 mb-8">
+            <a href="/" class="px-4 py-2 rounded-md text-white bg-gray-700 hover:bg-gray-600">Home</a>
+            <a href="/demo" class="px-4 py-2 rounded-md text-white bg-gray-700 hover:bg-gray-600">Demo</a>
+            <a href="/about" class="px-4 py-2 rounded-md text-white bg-gray-700 hover:bg-gray-600">About</a>
+        </nav>
+        <main>
+            <section class="mb-12">
+                <h1 class="text-4xl font-bold mb-4 text-center">Realtime Analysis</h1>
+                <div class="flex flex-wrap justify-center gap-8">
+                    <div class="bg-gray-800 p-6 rounded-lg w-full lg:w-1/7">
+                        <h2 class="text-2xl font-semibold mb-4">Sentiment Classification Table:</h2>
+                        <table class="custom-table" id="sentimentTable">
+                            <thead>
+                                <tr>
+                                    <th class="th-plus">Positive Sentiment</th>
+                                    <th class="th-minus">Negative Sentiment</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="bg-gray-800 p-6 rounded-lg w-full lg:w-1/7">
+                        <h2 class="text-2xl font-semibold mb-4">News:</h2>
+                        <table class="custom-table">
+                            <thead>
+                                <tr>
+                                    <th>S.No</th>
+                                    <th>News</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Placeholder content -->
+                                {% for n in news %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ n }}</tr>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script>
+        async function fetchDataAndUpdateTable(news) {
+            try {
+                var table = document.getElementById("sentimentTable");
+    
+                var tbody = table.querySelector("tbody");
+                if (!tbody) {
+                    tbody = table.createTBody();
+                }
+    
+                for (const article of news) {
+                    const response = await fetch(`https://text.saumay.me/?text=${encodeURIComponent(article)}`);
+                    const data = await response.json();
+    
+                    var row = tbody.insertRow();
+    
+                    var positiveCell = row.insertCell(0); 
+                    var negativeCell = row.insertCell(1); 
+
+                    if (data.response[1].score > data.response[0].score) {
+                        positiveCell.textContent = article;
+                    } else {
+                        negativeCell.textContent = article;
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+    
+        fetchDataAndUpdateTable({{ news | tojson | safe }});
+    </script>
+</body>
+</html>
