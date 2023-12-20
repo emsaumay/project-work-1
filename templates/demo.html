@@ -65,6 +65,15 @@
         </nav>
         <main>
             <section class="mb-12">
+                <h2 class="text-2xl font-semibold mb-4 text-center">Search Stock Sentiment</h2>
+                <div class="flex justify-center gap-4">
+                    <input type="text" id="searchInput" placeholder="Enter a keyword" class="p-2 border border-gray-400 rounded-md text-black bg-white">
+                    <button onclick="searchStockSentiment()" class="custom-btn">Search</button>
+                    <p id="searchResult" class="text-lg font-semibold mt-2"></p>
+                </div>
+            </section>
+
+            <section class="mb-12">
                 <h1 class="text-4xl font-bold mb-4 text-center">Realtime Analysis</h1>
                 <div class="flex flex-wrap justify-center gap-8">
                     <div class="bg-gray-800 p-6 rounded-lg w-full lg:w-1/7">
@@ -106,6 +115,9 @@
         </main>
     </div>
     <script>
+        var positiveArray = [];
+        var negativeArray = [];
+
         async function fetchDataAndUpdateTable(news) {
             try {
                 var table = document.getElementById("sentimentTable");
@@ -126,15 +138,52 @@
 
                     if (data.response[1].score > data.response[0].score) {
                         positiveCell.textContent = article;
+                        positiveArray.push(article.toLowerCase())
                     } else {
                         negativeCell.textContent = article;
+                        negativeArray.push(article.toLowerCase())
                     }
                 }
+                console.log(positiveArray)
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
         }
-    
+        
+function searchStockSentiment() {
+    try {
+        var searchInput = document.getElementById("searchInput").value.toLowerCase();
+        console.log(searchInput)
+        var isPositive = false;
+        var isNegative = false;
+
+        for (const positiveWord of positiveArray) {
+            if (positiveWord.includes(searchInput)) {
+                isPositive = true;
+                break;
+            }
+        }
+
+        for (const negativeWord of negativeArray) {
+            if (negativeWord.includes(searchInput)) {
+                isNegative = true;
+                break;
+            }
+        }
+
+        if (isPositive) {
+            document.getElementById("searchResult").textContent = "Stock is Bullish!";
+        } else if (isNegative) {
+            document.getElementById("searchResult").textContent = "Stock is Bearish!";
+        } else {
+            document.getElementById("searchResult").textContent = "No sentiment found for the entered keyword.";
+        }
+    } catch (error) {
+        console.error('Error searching stock sentiment:', error);
+    }
+}
+
+
         fetchDataAndUpdateTable({{ news | tojson | safe }});
     </script>
 </body>
